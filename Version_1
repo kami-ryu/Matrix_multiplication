@@ -1,0 +1,34 @@
+X = [[1,2,2],[2,4,5],[2,6,7]] 
+
+Y = [[1,0,0],[0,1,0],[0,0,1]]
+
+n = len(X)
+m = len(Y[0])
+print("result matrix rows, n is: ", n)
+print("result matrix columns, m is: ", m)
+
+Z = [[0]*m]*n
+print ("Z before operation is: "), print(Z)
+
+A = [[0,0,0],[0,0,0],[0,0,0]]
+print ("A before operation is: "), print(A)
+
+print("A and Z are the same matrix: ",A==Z)
+
+for i in range(len(X)):
+    for j in range(len(Y[0])):
+        for k in range(len(Y)):
+            A[i][j] += X[i][k] * Y[k][j]
+
+print("the A result matrix is: ")
+for a in A:
+    print(a)
+
+for i in range(len(X)):
+    for j in range(len(Y[0])):
+        for k in range(len(Y)):
+            Z[i][j] += X[i][k] * Y[k][j]
+            
+print("the Z result matrix is: ")
+for z in Z:
+    print(z)
