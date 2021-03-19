@@ -1,0 +1,21 @@
+class tile_reader():
+    def __init__ (self, size, tile_type):
+        self.size = size
+        self.tile_type = tile_type
+        self.margin = 1
+
+    def print_tile(self,posx,posy):
+        for i in range(posx):
+            for j in range(posy):
+                print(self.tile_type*self.size if i in [0,posx] else ' ', end = self.tile_type)
+
+        
+for i in range(20):
+    reader = tile_reader(2,'o')
+    reader.print_tile(1,i)
+    print('----', i)
+    
+for i in range(20):
+    reader = tile_reader(0,'o')
+    reader.print_tile(1,i)
+    print('----', i)
