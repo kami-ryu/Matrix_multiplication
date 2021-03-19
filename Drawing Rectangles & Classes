@@ -2,8 +2,8 @@ def add(x,y):
     result = x + y
     return result
     
-a = add(4,5)
-b = add(6,7)
+a = add(5,5)
+b = add(2,5)
 c = 14
 
 print('a is equal to: ', a)
@@ -20,13 +20,28 @@ class Rectangle:
     def shape(width,height):
         for i in range(height):
             for j in range(width):
-                print('*' if i in [0,height-1] or j in [0,width-1] else ' ', end = ' ')
+                print('x' if i in [0, height-1] or j in [0,width-1] or i == j else ' ', end = ' ')
             print()
         
+class Triangle:
+    def __init__ (self,name,width,height):
+        self.name = name
+        self.width = width
+        self.height = height
+        self.area = (width*height) / 2
         
-Rect_1 = Rectangle('charlie',30,7)
+    def shape(width,height):
+        for i in range(height):
+            for j in range(width):
+                print('*' if i in [j,height-1] or j == 0 else ' ', end = ' ')
+            print()
 
+        
+Rect_1 = Rectangle('charlie',a,b)
 print('Rect_1 s name is:', Rect_1.name)
 print('Rect_1 has an area of', Rect_1.area)
-
 Rectangle.shape(Rect_1.width,Rect_1.height)
+
+Tri_1 = Triangle('delta',a,b)
+print('Tri_1 has an area of ', Tri_1.area)
+Triangle.shape(Tri_1.width,Tri_1.height)
