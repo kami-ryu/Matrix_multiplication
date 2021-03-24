@@ -1,0 +1,35 @@
+import pygame
+
+screen = pygame.display.set_mode((400,400))
+
+black = (0,0,0)
+white = (255,255,255)
+
+# Game Loop
+
+rect_pos=[[5,200]]
+
+run = True
+while run:
+  
+  screen.fill(black)
+
+  rect1 = pygame.Rect(int(rect_pos[0][0]),int(rect_pos[0][1]),5,5)
+  pygame.draw.rect(screen,white,rect1)
+  
+  
+  rect_pos[0][0] += 0.01
+  rect_pos[0][1] += 0.002
+  
+  for event in pygame.event.get():
+    
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_ESCAPE:
+        run = False
+        pygame.quit()
+        
+  pygame.display.update()
