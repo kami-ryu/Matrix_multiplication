@@ -1,0 +1,90 @@
+import pygame
+import math
+import sys
+mainClock = pygame.time.Clock()
+pygame.init()
+
+screen = pygame.display.set_mode((800,800))
+
+white = (255,255,255)
+gray = (120,120,120)
+white2 = (240,240,240)
+red = (255,0,0)
+black = (0,0,0)
+
+ball_mass = 5 # kg
+rect1_pos = [[20,20],[0.5,0],[0,0]]
+
+
+bounce_y = 2.5
+
+myfont = pygame.font.SysFont('Arial',15)
+
+run = True
+while run:
+    
+  screen.fill(black)
+  
+  forcefield1 = pygame.Rect(0,470,800,500)
+  pygame.draw.rect(screen,white2,forcefield1)
+    
+  ground = pygame.Rect(0,550,800,500)
+  pygame.draw.rect(screen,gray,ground)
+  
+  wall1 = pygame.Rect(10-500,0,500,800)
+  pygame.draw.rect(screen,gray,wall1)
+  
+  wall2 = pygame.Rect(780,0,500,800)
+  pygame.draw.rect(screen,gray,wall2)
+    
+  rect1 = pygame.Rect(rect1_pos[0][0],rect1_pos[0][1],7,7)
+  pygame.draw.rect(screen,red,rect1)
+    
+  Gearth = 9.81/1000 # m/s^2
+    
+  rect1_pos[0][0] += rect1_pos[1][0]
+  rect1_pos[0][1] += rect1_pos[1][1]
+  rect1_pos[1][0] += rect1_pos[2][0]
+  rect1_pos[1][1] += rect1_pos[2][1]
+  rect1_pos[2][0] = 0
+  rect1_pos[2][1] = Gearth
+  
+  velocity_vector = math.sqrt(rect1_pos[1][0]**2 + rect1_pos[1][1]**2)
+  
+  ball_KE = 0.5*ball_mass*(velocity_vector**2)
+  
+  ball_KE_text = myfont.render('"Ball Energy": '+str(format(ball_KE, '.3f'))+ ' J', False, white)
+  screen.blit(ball_KE_text,(20,20))
+  
+  velo_text = myfont.render('"Velocity": '+str(format(velocity_vector, '.3f'))+ ' m/s', False, white)
+  screen.blit(velo_text,(20,40))
+  
+  if rect1.colliderect(ground):
+    bounce_y -= 0.1
+    if bounce_y < 0:
+      bounce_y = 0
+    rect1_pos[1][1] = -bounce_y
+    
+    if rect1_pos[1][0] > 0.00000000001:
+      rect1_pos[2][0] = -0.01
+    elif rect1_pos[1][0] < - 0.00000000001:
+      rect1_pos[2][0] = +0.01
+  
+
+  if rect1.colliderect(wall1):
+    rect1_pos[1][0] = 0.5
+    
+  if rect1.colliderect(wall2):
+    rect1_pos[1][0] = -0.5
+    
+
+    
+  for event in pygame.event.get():
+    
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      
+    
+  pygame.display.update()
+  mainClock.tick(120)
