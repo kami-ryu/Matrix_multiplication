@@ -1,0 +1,58 @@
+import pygame
+mainClock = pygame.time.Clock()
+pygame.init()
+
+screen = pygame.display.set_mode((800,800))
+
+white = (255,255,255)
+gray = (120,120,120)
+red = (255,0,0)
+black = (0,0,0)
+
+rect1_pos = [[20,20],[0.5,0],[0,0]]
+
+run = True
+while run:
+    
+  screen.fill(black)
+    
+  ground = pygame.Rect(0,550,800,1)
+  pygame.draw.rect(screen,gray,ground)
+  
+  wall1 = pygame.Rect(10,0,1,800)
+  pygame.draw.rect(screen,gray,wall1)
+  
+  wall2 = pygame.Rect(780,0,1,800)
+  pygame.draw.rect(screen,gray,wall2)
+    
+  rect1 = pygame.Rect(rect1_pos[0][0],rect1_pos[0][1],7,7)
+  pygame.draw.rect(screen,red,rect1)
+    
+  Gearth = 9.81 # m/s^2
+    
+  rect1_pos[0][0] += rect1_pos[1][0]
+  rect1_pos[0][1] += rect1_pos[1][1]
+  rect1_pos[1][0] += rect1_pos[2][0]
+  rect1_pos[1][1] += rect1_pos[2][1]
+  rect1_pos[2][0] = 0
+  rect1_pos[2][1] = Gearth/1000
+  
+  if rect1.colliderect(ground):
+    rect1_pos[1][1] = -1.5
+    rect1_pos[2][1] = -0.9
+    
+  if rect1.colliderect(wall1):
+    rect1_pos[1][0] = 0.5
+    
+  if rect1.colliderect(wall2):
+    rect1_pos[1][0] = -0.5
+    
+  for event in pygame.event.get():
+    
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      
+    
+  pygame.display.update()
+  mainClock.tick(120)
