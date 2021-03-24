@@ -20,6 +20,8 @@ bounce_y = 2.5
 
 myfont = pygame.font.SysFont('Arial',15)
 
+time = 0
+
 run = True
 while run:
     
@@ -40,7 +42,7 @@ while run:
   rect1 = pygame.Rect(rect1_pos[0][0],rect1_pos[0][1],7,7)
   pygame.draw.rect(screen,red,rect1)
     
-  Gearth = 9.81/1000 # m/s^2
+  Gearth = 0 #9.81/1000 # m/s^2
     
   rect1_pos[0][0] += rect1_pos[1][0]
   rect1_pos[0][1] += rect1_pos[1][1]
@@ -58,6 +60,12 @@ while run:
   
   velo_text = myfont.render('"Velocity": '+str(format(velocity_vector, '.3f'))+ ' m/s', False, white)
   screen.blit(velo_text,(20,40))
+  
+  time_text = myfont.render('time: '+str(format(time, '.3f'))+ ' s', False, white)
+  screen.blit(time_text,(20,60))
+  
+  
+    
   
   if rect1.colliderect(ground):
     bounce_y -= 0.1
@@ -86,5 +94,6 @@ while run:
       pygame.quit()
       
     
+  time += 1/60
   pygame.display.update()
-  mainClock.tick(120)
+  mainClock.tick(60)
