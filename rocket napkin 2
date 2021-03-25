@@ -1,0 +1,172 @@
+# initialize pygame
+
+import pygame, sys, random, math
+from pygame.locals import *
+mainClock = pygame.time.Clock()
+pygame.init()
+
+# initialize display, colors, font
+
+screen = pygame.display.set_mode((500,500))
+
+white = (255,255,255)
+black = (0,0,0)
+blue = (0,0,255)
+green = (0,255,0)
+red = (255,0,0)
+
+font1 = pygame.font.Font(None,30)
+
+# Classes
+
+class Rocket():
+  def __init__(self,dry_mass,thrust,fuel_mass,oxid_mass):
+    self.dry_mass = dry_mass
+    self.thrust = thrust
+    self.fuel_mass = fuel_mass
+    self.oxid_mass = oxid_mass
+    
+    self.wet_mass = dry_mass + fuel_mass + oxid_mass
+    
+# functions
+
+def increment_time(x):
+  x += 1/60
+  return x
+
+
+# variables initial
+
+Launch_pressed = False
+mission_time = 0
+altitude = 0
+click = False
+mission_started = False
+abort_pressed = False
+Gearth = 9.81 # m/s²
+
+# Rocket variables
+
+rock1 = Rocket(3000,225*1000,4500,5000)
+
+rocket_mass = rock1.wet_mass
+rocket_thrust = rock1.thrust
+
+# Rocket intial pos
+
+rocket_pos = [[0,0],[0,0],[0,0]]
+rocket_pos[0][0] = 300
+rocket_pos[0][1] = 350
+rocket_x_acc = 0
+rocket_y_acc = 0
+
+
+# game loop
+
+run = True
+while run:
+  
+  # refresh screen
+  
+  screen.fill(black)
+  
+  ground = pygame.Rect(0,450,500,70)
+  pygame.draw.rect(screen,green,ground)
+  
+  # running loop
+  
+  mx,my = pygame.mouse.get_pos()
+  
+  rocket_pos[0][0] += rocket_pos[1][0]
+  rocket_pos[0][1] += rocket_pos[1][1]
+  rocket_pos[1][0] += rocket_pos[2][0]
+  rocket_pos[1][1] += rocket_pos[2][1]
+  rocket_pos[2][0] = rocket_x_acc
+  rocket_pos[2][1] = rocket_y_acc
+  
+  if mission_started == True:
+    mission_time = increment_time(mission_time)
+  
+  if Launch_pressed == True:
+    mission_started = True
+    
+    # - SOMETHING NOT RIGHT HERE AT ALL - #
+    rocket_y_acc = -(rocket_thrust/rocket_mass) + Gearth 
+    # - SOMETHING NOT RIGHT HERE AT ALL - #
+    
+  if abort_pressed == True:
+    rocket_thrust = 0
+  
+  altitude += rocket_pos[1][1]/60
+  
+  text = font1.render('Time: ' + str(format(mission_time, '.1f')) + ' s',1,white)
+  screen.blit(text,(40,40))
+  
+  text = font1.render('Velocity: ' + str(format(-rocket_pos[1][1], '.1f')) + ' m/s',1,white)
+  screen.blit(text,(40,60))
+  
+  text = font1.render('Altitude: ' + str(format(-altitude, '.1f')) + ' m',1,white)
+  screen.blit(text,(40,80))
+  
+  launch_rect = pygame.Rect(420,100,35,20)
+  pygame.draw.rect(screen,red,launch_rect)
+  
+  abort_rect = pygame.Rect(420,125,35,20)
+  pygame.draw.rect(screen,blue,abort_rect)
+  
+  
+
+  rocket_rect = pygame.Rect(rocket_pos[0][0],rocket_pos[0][1],7,20)
+  pygame.draw.rect(screen,red, rocket_rect)
+  
+  
+  # event loop
+  
+  if launch_rect.collidepoint(mx,my):
+    if click == True:
+      Launch_pressed = True
+      
+  if abort_rect.collidepoint(mx,my):
+    if click == True:
+      abort_pressed = True
+      
+  if rocket_rect.colliderect(ground):
+    pass
+    
+  
+  for event in pygame.event.get():
+    
+    if event.type == MOUSEBUTTONDOWN:
+      if event.button == 1:
+        click = True
+      
+    if event.type == pygame.MOUSEBUTTONUP:
+      if event.button == 1:
+        click = False
+    
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_PAUSE:
+        paused = True
+        while paused:
+          
+          text = font1.render('PAUSED',1,white)
+          screen.blit(text,(250,250))
+          pygame.display.update()
+          
+          for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+              if event.key == K_PAUSE:
+                paused = False
+          
+    
+         
+    
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      
+      
+  # update display    
+  
+  pygame.display.update()
+  mainClock.tick(60)
