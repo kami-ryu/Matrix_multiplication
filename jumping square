@@ -1,0 +1,140 @@
+import pygame, sys
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+
+pygame.init()
+
+# -- init Screen 
+
+window_width = 500
+window_height = 500
+
+screen = pygame.display.set_mode((window_width,window_height))
+
+# -- classes
+
+# -- functions
+
+# -- Variables & init variables
+
+white = (255,255,255)
+black = (0,0,0)
+green = (0,255,0)
+
+myfont = pygame.font.Font(None,30)
+
+gravity = 0.2 # 0.2
+tea_x_acc = 0
+tea_y_acc = 0
+
+# -- key variables
+
+right_pressed = False
+left_pressed = False
+
+# -- Player pos,vel,acc
+
+tea_pos = [[0,0],[0,0],[0,0]]
+
+# -- Game Loop
+
+run = True
+while run:
+  
+  # fill screen
+  
+  screen.fill(black)
+  
+  # render images
+  
+  ground = pygame.Rect(0,470,400,20)
+  pygame.draw.rect(screen,green,ground)
+  
+  tea_rect = pygame.Rect(tea_pos[0][0],tea_pos[0][1],20,20)
+  pygame.draw.rect(screen,white,tea_rect)
+  
+  # move player
+  
+  tea_pos[0][0] += tea_pos[1][0] 
+  tea_pos[0][1] += tea_pos[1][1]
+  tea_pos[1][0] += tea_pos[2][0]
+  tea_pos[1][1] += tea_pos[2][1]
+  tea_pos[2][0] = tea_x_acc
+  tea_pos[2][1] = tea_y_acc + gravity
+  
+  # limit fall speed & walk speeds
+  
+  if tea_pos[1][1] > 3:
+    tea_pos[1][1] = 3
+    
+  if tea_pos[1][0] > 1:
+    tea_pos[1][0] = 1
+    
+  if tea_pos[1][0] < -1:
+    tea_pos[1][0] = -1
+    
+  # display values
+  
+  text = myfont.render('tea_x_acc: ' + str(tea_x_acc), True, white)
+  screen.blit(text, (20, 20))
+  
+  text = myfont.render('tea_y_acc: ' + str(tea_y_acc), True, white)
+  screen.blit(text, (20, 40))
+  
+  text = myfont.render('right_pressed: ' + str(right_pressed), True, white)
+  screen.blit(text, (20, 60))
+  
+  # collisions
+  
+  if tea_rect.colliderect(ground) == True:
+    tea_pos[0][1] = 470 - 20
+    tea_pos[1][1] = 0
+    tea_pos[2][1] = 0
+    
+  
+    
+  
+  
+  for event in pygame.event.get():
+    
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_RIGHT:
+        right_pressed = True
+        if right_pressed == True:
+          tea_x_acc = 0.2
+          
+    if event.type == pygame.KEYUP:
+      if event.key == K_RIGHT:
+        right_pressed = False
+        if right_pressed == False:
+          tea_x_acc = 0
+          tea_pos[2][0] = 0
+          tea_pos[1][0] = 0
+          
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_LEFT:
+        left_pressed = True
+        if left_pressed == True:
+          tea_x_acc = -0.2
+          
+    if event.type == pygame.KEYUP:
+      if event.key == K_LEFT:
+        left_pressed = False
+        if left_pressed == False:
+          tea_x_acc = 0
+          tea_pos[2][0] = 0
+          tea_pos[1][0] = 0
+           
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_SPACE:
+          tea_pos[1][1] -= 5
+    
+    if event.type == pygame.QUIT:
+      pygame.quit()
+      run = False
+  
+  pygame.display.update()
+  mainClock.tick(60)
+
