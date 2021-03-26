@@ -1,0 +1,126 @@
+# -- initialize pygame
+
+import pygame, sys, os, noise
+from pygame.locals import *
+
+clock = pygame.time.Clock()
+pygame.init()
+
+# -- initialize screen
+
+screen_width = 1200
+screen_height = 720
+screen_size = (screen_width,screen_height)
+
+screen = pygame.display.set_mode(screen_size)
+pygame.display.set_caption('A Race Game')
+
+# -- load images
+
+play1_img = pygame.image.load('images/racer_1px.png')
+play1_img = pygame.transform.scale(play1_img,(80,35))
+grass_img = pygame.image.load('images/grass.png')
+dirt_img = pygame.image.load('images/dirt.png')
+
+black = (0,0,0)
+white = (255,255,255)
+
+racer1_pos = [[0,0],[0,0],[0,0]]
+
+racer1_x_acc = 0
+racer1_y_acc = 0
+racer1_y_booster = 0
+
+time = 0
+
+myfont = pygame.font.SysFont('Arial', 15)
+
+Gearth = 9.81/1000
+increased_gravity = False
+
+# -- Functions
+
+def PID(setpoint,pos1,pos0,t1,t0):
+    Kp = 0.09
+    Kd = 0.009
+
+    error = pos1 - setpoint
+    derror = (pos1 - pos0)/(t1 - t0)
+    output = Kd*error + Kp*derror
+    return output
+
+run = True
+while run:
+
+    screen.fill(white)
+
+    racer1_rect = pygame.Rect(racer1_pos[0][0],racer1_pos[0][1],80,35)
+    play1_img.set_colorkey(white)
+    screen.blit(play1_img,(racer1_pos[0][0],racer1_pos[0][1]))
+
+    racer1_pos[0][0] += racer1_pos[1][0]
+    racer1_pos[0][1] += racer1_pos[1][1]
+    racer1_pos[1][0] += racer1_pos[2][0]
+    racer1_pos[1][1] += racer1_pos[2][1]
+    racer1_pos[2][0] = racer1_x_acc
+    racer1_pos[2][1] = racer1_y_acc + Gearth - racer1_y_booster
+
+    text = myfont.render(str(racer1_pos[2][0]), True, black)
+    screen.blit(text, (20, 20))
+
+    text = myfont.render(str(racer1_pos[2][1]), True, black)
+    screen.blit(text, (20, 40))
+
+    text = myfont.render(str(racer1_y_booster), True, black)
+    screen.blit(text, (20, 60))
+
+    text = myfont.render('increased gravity true? ' + str(increased_gravity), True, black)
+    screen.blit(text, (20, 80))
+
+    time += 1/60
+
+    t1 = time
+    t0 = time - 1
+
+    pos1 = racer1_pos[0][1]
+    pos0 = racer1_pos[0][1] - racer1_pos[1][1]
+
+    racer1_y_booster = PID(520,pos1,pos0,t1,t0)
+
+    for event in pygame.event.get():
+
+        if event.type == KEYDOWN:
+            if event.key == K_d:
+                racer1_x_acc = 0.03
+
+        if event.type == KEYUP:
+            if event.key == K_d:
+                racer1_x_acc = 0
+
+        if event.type == KEYDOWN:
+            if event.key == K_a:
+                racer1_x_acc = -0.03
+
+        if event.type == KEYUP:
+            if event.key == K_a:
+                racer1_x_acc = 0
+
+        if event.type == KEYDOWN:
+            if event.key == K_SPACE:
+                increased_gravity = True
+                if increased_gravity == True:
+                    Gearth = 2*Gearth
+
+        if event.type == KEYUP:
+            if event.key == K_SPACE:
+                increased_gravity = False
+                if increased_gravity == False:
+                    Gearth = 9.81/1000
+
+        if event.type == pygame.QUIT:
+            run = False
+            pygame.quit()
+            sys.exit()
+
+    pygame.display.update()
+    clock.tick(60)
