@@ -1,0 +1,192 @@
+import pygame, sys, random
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+
+pygame.init()
+
+# -- init Screen 
+
+window_width = 500
+window_height = 500
+
+screen = pygame.display.set_mode((window_width,window_height))
+
+# -- classes
+
+# -- functions
+
+def add_terrain(tea_x,tea_y):
+  terrain.append([tea_x,tea_y])
+  
+  '''
+  terrain_rect = pygame.Rect(tea_x,tea_y,random.randint(1,7)*100,random.randint(1,2)*10)
+  pygame.draw.rect(screen,green,terrain_rect) '''
+
+# -- Variables & init variables
+
+white = (255,255,255)
+black = (0,0,0)
+green = (0,255,0)
+
+myfont = pygame.font.Font(None,30)
+
+gravity = 0.2 # 0.2
+tea_x_acc = 0
+tea_y_acc = 0
+
+# -- key variables
+
+right_pressed = False
+left_pressed = False
+
+true_scroll = [0,0]
+
+terrain = []
+terrain_rects = []
+
+# -- Player pos,vel,acc
+
+tea_pos = [[250,250],[0,0],[0,0]]
+tea_rect = pygame.Rect(tea_pos[0][0],tea_pos[0][1],20,20)
+
+# -- Game Loop
+
+run = True
+while run:
+  
+  # fill screen
+  
+  screen.fill(black)
+  
+  # scrolling
+  
+  true_scroll[0] += (tea_pos[0][0] - true_scroll[0]-250)/20 
+  true_scroll[1] += (tea_pos[0][1] - true_scroll[1]-250)/5
+  scroll = [0,0]
+  scroll[0] = int(true_scroll[0])
+  scroll[1] = int(true_scroll[1])
+  
+  # adding terrain
+  
+  for ter_rects in terrain:
+    for i in range(len(terrain)):
+      ter_rects = pygame.Rect(terrain[i][0]-scroll[0],terrain[i][1]-scroll[1],terrain[i][2],terrain[i][3])
+      terrain_rects.append(ter_rects)
+      pygame.draw.rect(screen,green,ter_rects)
+    
+    
+ 
+    
+  
+  # render images
+  tea_rect = pygame.Rect(tea_pos[0][0]-scroll[0],tea_pos[0][1]-scroll[1],20,20)
+  ground = pygame.Rect(0-scroll[0],470-scroll[1],400,20)
+  pygame.draw.rect(screen,green,ground)
+  
+  pygame.draw.rect(screen,white,tea_rect)
+  
+  # move player
+  
+  tea_pos[0][0] += tea_pos[1][0]
+  tea_pos[0][1] += tea_pos[1][1]
+  tea_pos[1][0] += tea_pos[2][0]
+  tea_pos[1][1] += tea_pos[2][1]
+  tea_pos[2][0] = tea_x_acc
+  tea_pos[2][1] = tea_y_acc + gravity
+  
+  # limit fall speed & walk speeds
+  
+  if tea_pos[1][1] > 5:
+    tea_pos[1][1] = 5
+    
+  if tea_pos[1][0] > 1:
+    tea_pos[1][0] = 1
+    
+  if tea_pos[1][0] < -1:
+    tea_pos[1][0] = -1
+    
+  # display values
+  
+  text = myfont.render('true_scroll[0]: ' + str(scroll[0]), True, white)
+  screen.blit(text, (20, 20))
+  
+  text = myfont.render('true_scroll[1]: ' + str(scroll[1]), True, white)
+  screen.blit(text, (20, 40))
+  
+  text = myfont.render('tea_pos_x: ' + str(tea_pos[0][0]), True, white)
+  screen.blit(text, (20, 60))
+  
+  text = myfont.render('tea_pos_y: ' + str(tea_pos[0][1]), True, white)
+  screen.blit(text, (20, 80))
+  
+  
+  
+  # collisions
+  
+  
+  if tea_rect.colliderect(ground) == True:
+    tea_pos[0][1] = 470 - 20
+    tea_pos[1][1] = 0
+    tea_pos[2][1] = 0 
+  
+  
+  
+  for event in pygame.event.get():
+    
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_RIGHT:
+        right_pressed = True
+        if right_pressed == True:
+          tea_x_acc = 0.2
+          
+    if event.type == pygame.KEYUP:
+      if event.key == K_RIGHT:
+        right_pressed = False
+        if right_pressed == False:
+          tea_x_acc = 0
+          tea_pos[2][0] = 0
+          tea_pos[1][0] = 0
+          
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_LEFT:
+        left_pressed = True
+        if left_pressed == True:
+          tea_x_acc = -0.2
+          
+    if event.type == pygame.KEYUP:
+      if event.key == K_LEFT:
+        left_pressed = False
+        if left_pressed == False:
+          tea_x_acc = 0
+          tea_pos[2][0] = 0
+          tea_pos[1][0] = 0
+           
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_SPACE:
+          tea_pos[1][1] -= 5
+          
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_TAB:
+        x = tea_pos[0][0]
+        y = tea_pos[0][1]
+        a = random.randint(1,7)*100
+        b = random.randint(1,2)*10
+        terrain.append([int(x),int(y),a,b])
+        
+    if event.type == pygame.KEYDOWN:
+      if event.key == K_p:
+        x = tea_pos[0][0] + random.randint(1,200) - 100
+        y = tea_pos[0][1] + random.randint(1,200) - 100
+        a = random.randint(1,7)*100
+        b = random.randint(1,2)*10
+        terrain.append([int(x),int(y),a,b])
+    
+    if event.type == pygame.QUIT:
+      pygame.quit()
+      run = False
+  
+  pygame.display.update()
+  mainClock.tick(60)
+
