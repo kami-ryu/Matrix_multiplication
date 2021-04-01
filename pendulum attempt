@@ -1,0 +1,72 @@
+import pygame, sys
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+
+pygame.init()
+
+screen_size = (600,600)
+
+screen = pygame.display.set_mode(screen_size)
+
+white = (255,255,255)
+black = (0,0,0)
+
+myfont = pygame.font.Font(None,30)
+
+GEarth = -0.05
+
+mass_pos=[[300,200],[0,0],[0,0]]
+
+string_pos = [300,100]
+
+x_reaction = 0
+y_reaction = 0
+
+string_length = 0
+
+# -- Game loop
+
+run = True
+while run:
+  
+  screen.fill(black)
+  
+  # Let's call string length = 100. if dist between string_pos and mass_pos[0] > 100, then force is applied to mass
+  
+  string_length = mass_pos[0][1] - string_pos[1]
+  string_length0 = 100
+  k = 0.0025
+  mass = 2
+  
+  y_reaction = (k/mass) * mass_pos[0][1]
+  
+  
+  mass_pos[0][0] += mass_pos[1][0]
+  mass_pos[0][1] += mass_pos[1][1]
+  mass_pos[1][0] += mass_pos[2][0]
+  mass_pos[1][1] += mass_pos[2][1]
+  mass_pos[2][0] = x_reaction
+  mass_pos[2][1] = y_reaction - GEarth
+  
+  mass_rect = pygame.Rect(mass_pos[0][0],mass_pos[0][1],20,20)
+  pygame.draw.rect(screen,white,mass_rect)
+  
+  pygame.draw.line(screen,white,string_pos,mass_pos[0])
+  
+  text = myfont.render('x pos: '+str(mass_pos[0][0]),False,white)
+  screen.blit(text,(20,20))
+  
+  text = myfont.render('y pos: '+str(mass_pos[0][1]),False,white)
+  screen.blit(text,(20,40))
+  
+  for event in pygame.event.get():
+    
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      sys.exit()
+      
+  pygame.display.update()
+  mainClock.tick(240)
