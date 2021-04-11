@@ -1,0 +1,106 @@
+import pygame, sys, math
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+pygame.init()
+
+# -- render display
+
+screen_size = (800,800)
+screen = pygame.display.set_mode(screen_size)
+
+white = (255,255,255)
+black = (0,0,0)
+
+myfont = pygame.font.Font(None,20)
+
+# parameters
+
+mass_pos = [[0,0],[0,0],[0,0]]
+
+mass_pos[0][0] = 250
+mass_pos[0][1] = 300
+
+x_acc = 0
+y_acc = 0
+
+reaction = 0
+x_react = 0
+y_react = 0
+
+GEarth = .02
+
+run = True
+while run:
+
+    screen.fill(black)
+    # main loop
+
+    mass_rect = pygame.Rect(mass_pos[0][0], mass_pos[0][1], 20, 20)
+    mass_img = pygame.draw.rect(screen,white,mass_rect)
+
+    pivot_pos = (200,250)
+
+    line_1 = pygame.draw.line(screen,white,pivot_pos,(mass_pos[0][0],mass_pos[0][1]))
+
+    Reaction = - GEarth
+
+    x_dist = mass_pos[0][0] - pivot_pos[0]
+    y_dist = mass_pos[0][1] - pivot_pos[1]
+
+    dist = math.sqrt(x_dist**2+y_dist**2)
+    elong = dist - 100
+    theta = math.asin(x_dist / dist)
+
+    current_pos_x = mass_pos[0][0]
+    current_pos_y = mass_pos[0][1]
+    current_vel_x = mass_pos[1][0]
+    current_vel_y = mass_pos[1][1]
+    current_acc_x = mass_pos[2][0]
+    current_acc_y = mass_pos[2][1]
+
+    if dist > 100:
+        x_react_mag = 0.02*elong
+        x_react = x_react_mag*math.sin(theta)
+        mass_pos[0][0] = current_pos_x
+        mass_pos[1][0] -= 0
+        mass_pos[2][0] -= x_react
+    if dist > 100:
+        y_react_mag = 0.02*elong
+        y_react = y_react_mag*math.cos(theta)
+        mass_pos[0][1] = current_pos_y
+        mass_pos[1][1] -= 0
+        mass_pos[2][1] -= y_react
+
+    mass_pos[0][0] += mass_pos[1][0]
+    mass_pos[0][1] += mass_pos[1][1]
+    mass_pos[1][0] += mass_pos[2][0]
+    mass_pos[1][1] += mass_pos[2][1]
+    mass_pos[2][0] = + x_acc
+    mass_pos[2][1] = GEarth - y_acc
+
+    text = myfont.render('y_acc: ' + str(mass_pos[2][1]), True, white)
+    screen.blit(text, (20, 20))
+
+    text = myfont.render('x_acc: ' + str(mass_pos[2][0]), True, white)
+    screen.blit(text, (20, 40))
+
+    text = myfont.render('theta: ' + str(theta), True, white)
+    screen.blit(text, (20, 60))
+
+    text = myfont.render('x_dist: ' + str(x_dist), True, white)
+    screen.blit(text, (20, 80))
+
+    text = myfont.render('y_dist: ' + str(y_dist), True, white)
+    screen.blit(text, (20, 100))
+
+    # events
+
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            pygame.quit()
+            sys.exit()
+
+    pygame.display.update()
+    mainClock.tick(60)
