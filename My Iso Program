@@ -1,0 +1,48 @@
+import pygame, sys
+import numpy as np
+from pygame.locals import *
+pygame.init()
+
+mainClock = pygame.time.Clock()
+
+screen_size = (500,500)
+screen = pygame.display.set_mode(screen_size)
+
+black = (0,0,0)
+white=(255,255,255)
+gray = (120,120,120)
+red = (255,0,0)
+
+# -- Vars
+
+_vars = {
+  'cellsize': 20,
+  'isoGridOrigin': [50,400]}
+  
+
+
+# -- Functions
+
+def cartToIso(point):
+    isoX = point[0] - point[1]
+    isoY = (point[0] + point[1])/2
+    return [isoX, isoY]
+
+# -- Main Loop
+
+run = True
+while run:
+  
+  screen.fill(black)
+  
+  
+  
+  for event in pygame.event.get():
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      sys.exit()
+  
+  pygame.display.update()
+  mainClock.tick(60)
+
