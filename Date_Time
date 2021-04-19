@@ -1,0 +1,59 @@
+import pygame, datetime, sys
+import datetime as dt
+from datetime import datetime, timedelta
+from pygame.locals import *
+
+pygame.init()
+
+mainClock = pygame.time.Clock()
+
+screen = pygame.display.set_mode((500,500))
+
+myfont = pygame.font.Font(None,30)
+
+white = (255,255,255)
+red = (230,20,20)
+black = (0,0,0)
+
+time = 0
+
+date = dt.datetime(1956,1,1,6,0,0)
+
+click = False
+
+run = True
+while run:
+  
+  mx,my = pygame.mouse.get_pos()
+  
+  screen.fill(black)
+  
+  day_btn_rect= pygame.Rect(300,300,20,20)
+  day_btn = pygame.draw.rect(screen,white,day_btn_rect)
+  day_btn_hover = day_btn_rect.collidepoint(mx,my)
+  if day_btn_hover:
+    day_btn = pygame.draw.rect(screen,red,day_btn_rect)
+  
+  date += timedelta(seconds=1/60)
+  date_str = date.strftime("%d %B %Y, %H:%M:%S")
+  
+  text = myfont.render(date_str, True, white)
+  screen.blit(text, (20, 20))
+  
+  for event in pygame.event.get():
+    
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      click = True
+      
+    if event.type ==  pygame.MOUSEBUTTONUP:
+      click = False
+      
+    if click and day_btn_hover:
+      date += timedelta(days=1)
+    
+    if event.type == pygame.QUIT:
+      pygame.quit()
+      run = False
+  
+  pygame.display.update()
+  mainClock.tick(60)
