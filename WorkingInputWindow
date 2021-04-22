@@ -1,0 +1,133 @@
+import pygame, sys
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+
+pygame.init()
+
+screen = pygame.display.set_mode((500,500))
+
+white = (255,255,255)
+black = (0,0,0)
+red = (255,0,0)
+sky_blue = (150,150,230)
+light_gray = (200,200,200)
+gray = (120,120,120)
+dark_gray = (40,40,40)
+
+COLOR_INACTIVE = pygame.Color('lightskyblue3')
+COLOR_ACTIVE = pygame.Color('dodgerblue2')
+
+myfont = pygame.font.Font(None,28)
+FONT = pygame.font.Font(None, 32)
+
+def RenderText(Text,color,pos):
+  text = myfont.render(Text,True,color)
+  screen.blit(text,pos)
+
+class NewInputBox:
+
+    def __init__(self, x_pos, y_pos, w, h, text=''):
+      self.x_pos = x_pos
+      self.y_pos = y_pos
+      self.rect = pygame.Rect(x_pos+20, x_pos+220, w, h)
+      self.color = gray
+      self.text = text
+      self.txt_surface = FONT.render(text, True, self.color)
+      self.active = False
+      self.close_rect = pygame.Rect(x_pos + 300 - 30, y_pos,30,30)
+      
+
+    def handle_event(self, event):
+      if event.type == pygame.MOUSEBUTTONDOWN:
+          # If the user clicked on the input_box rect.
+          if self.rect.collidepoint(event.pos):
+              # Toggle the active variable.
+              self.active = not self.active
+          else:
+              self.active = False
+          # Change the current color of the input box.
+          self.color = dark_gray if self.active else gray
+      if event.type == pygame.KEYDOWN:
+          if self.active:
+              if event.key == pygame.K_RETURN:
+                  print(self.text)
+                  self.text = ''
+              elif event.key == pygame.K_BACKSPACE:
+                  self.text = self.text[:-1]
+              else:
+                  self.text += event.unicode
+              # Re-render the text.
+              self.txt_surface = FONT.render(self.text, True, self.color)
+
+    def update(self):
+      # Resize the box if the text is too long.
+      width = max(200, self.txt_surface.get_width()+10)
+      self.rect.w = width
+
+    def draw(self, screen):
+      WindowOrigin = (self.x_pos,self.x_pos)
+      WindowSize = (300,300)
+      TaskBarHeight = 30
+      WindowRect = pygame.Rect(WindowOrigin[0],WindowOrigin[1],WindowSize[0],WindowSize[1])
+      pygame.draw.rect(screen,light_gray,WindowRect)
+      BarRect = pygame.Rect(WindowOrigin[0],WindowOrigin[1],WindowSize[0],TaskBarHeight)
+      pygame.draw.rect(screen,black,BarRect)
+      CloseRect = pygame.Rect(WindowOrigin[0] + WindowSize[0] - TaskBarHeight, WindowOrigin[1],TaskBarHeight,TaskBarHeight)
+      pygame.draw.rect(screen,red,CloseRect)
+      RenderText('hello world',white,(WindowOrigin[0]+28/4,WindowOrigin[1] + 28/4))
+      RenderText('X',white,(WindowOrigin[0] + WindowSize[0] - TaskBarHeight+28/4, WindowOrigin[1]+28/4))
+      # Blit the text.
+      screen.blit(self.txt_surface, (self.rect.x+5, self.rect.y+5))
+      # Blit the rect.
+      pygame.draw.rect(screen, self.color, self.rect, 2)
+
+click = False
+
+Input1 = NewInputBox(100,100,140,32)
+input_boxes = [Input1]
+InputWindowBool = False
+
+run = True
+while run:
+
+  mx,my = pygame.mouse.get_pos()
+
+  screen.fill(sky_blue)
+  
+  Button = pygame.Rect(20,20,20,20)
+  pygame.draw.rect(screen,white,Button)
+  
+  
+  if InputWindowBool:
+    CloseWindowRect = Input1.close_rect
+    Input1.draw(screen)
+    Input1.update()
+
+
+  for event in pygame.event.get():
+    
+    if InputWindowBool:
+      if CloseWindowRect.collidepoint(mx,my) and click:
+        InputWindowBool = False
+      
+    if Button.collidepoint(mx,my) and click:
+      InputWindowBool = True
+    
+    for box in input_boxes:
+      box.handle_event(event)
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      click = True
+
+    if event.type == pygame.MOUSEBUTTONUP:
+      click = False
+
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      sys.exit()
+
+  pygame.display.update()
+  mainClock.tick(60)
