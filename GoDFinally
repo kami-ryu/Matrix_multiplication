@@ -1,0 +1,267 @@
+import pygame, sys
+
+from pygame.locals import *
+
+mainClock = pygame.time.Clock()
+
+pygame.init()
+
+screen = pygame.display.set_mode((500,500))
+
+white = (255,255,255)
+black = (0,0,0)
+red = (255,0,0)
+sky_blue = (150,150,230)
+light_gray = (200,200,200)
+gray = (120,120,120)
+dark_gray = (40,40,40)
+
+myfont = pygame.font.Font(None,28)
+FONT = pygame.font.Font(None, 32)
+
+def RenderText(Text,color,pos):
+  text = myfont.render(Text,True,color)
+  screen.blit(text,pos)
+  
+def AddFunds(amount):
+  dict_game['funds'] += amount
+
+class NewInputBox:
+
+    def __init__(self, x_pos, y_pos, w, h, title, text='', WindowActive = False, WindowDrag = False):
+      self.x_pos = x_pos
+      self.y_pos = y_pos
+      self.w = w
+      self.h = h
+      self.title = title
+      self.WindowActive = WindowActive
+      self.WindowDrag = WindowDrag
+      
+      self.color = gray
+      self.text = text
+      self.txt_surface = FONT.render(text, True, self.color)
+      self.InputActive = False
+      self.WindowOrigin = (self.x_pos,self.x_pos)
+      self.WindowSize = (300,300)
+      self.TaskBarHeight = 30
+      self.mx1 = 0
+      self.my1 = 0
+      self.x1 = 0
+      self.y1 = 0
+      
+      
+    
+    
+    def handle_event(self, event):
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        if self.CloseRect.collidepoint(event.pos):
+          self.WindowActive = False
+        if self.InputRect.collidepoint(event.pos):
+            self.InputActive = not self.InputActive
+        else:
+            self.InputActive = False
+        self.color = dark_gray if self.InputActive else gray
+        
+        if self.BarRect.collidepoint(event.pos):
+          mx,my = pygame.mouse.get_pos()
+          self.mx1 = mx
+          self.my1 = my
+          self.x1 = self.x_pos
+          self.y1 = self.y_pos
+          self.WindowDrag = True
+          
+          
+      if event.type == pygame.MOUSEBUTTONUP:
+        self.WindowDrag = False
+      if event.type == pygame.KEYDOWN:
+          if self.InputActive:
+              if event.key == pygame.K_RETURN:
+                  print(self.text)
+                  self.text = ''
+              elif event.key == pygame.K_BACKSPACE:
+                  self.text = self.text[:-1]
+              elif len(self.text) > 24:
+                self.text = self.text[:-1]
+              else:
+                  self.text += event.unicode
+              # Re-render the text.
+              self.txt_surface = myfont.render(self.text, True, self.color)
+
+    def draw(self, screen):
+      mx,my = pygame.mouse.get_pos()
+      if self.WindowActive:
+        if self.WindowDrag:
+          dX = mx - self.mx1
+          dY = my - self.my1
+          self.x_pos = self.x1 + dX
+          self.y_pos = self.y1 + dY
+        self.WindowRect = pygame.Rect(self.x_pos,self.y_pos,self.WindowSize[0],self.WindowSize[1])
+        self.BarRect = pygame.Rect(self.x_pos,self.y_pos,self.WindowSize[0],self.TaskBarHeight)
+        self.CloseRect = pygame.Rect(self.x_pos + self.WindowSize[0] - self.TaskBarHeight, self.y_pos,self.TaskBarHeight,self.TaskBarHeight)
+        self.InputRect = pygame.Rect(self.x_pos+20, self.y_pos+220, 260, self.h)
+        pygame.draw.rect(screen,light_gray,self.WindowRect)
+        pygame.draw.rect(screen,black,self.BarRect)
+        pygame.draw.rect(screen,red,self.CloseRect)
+        RenderText(self.title,white,(self.x_pos+28/4,self.y_pos + 28/4))
+        RenderText('X',white,(self.x_pos + self.WindowSize[0] - self.TaskBarHeight+28/4, self.y_pos+28/4))
+        RenderText(str(self.mx1),white,(self.x_pos + 100,self.y_pos + 100))
+        RenderText(str(self.my1),white,(self.x_pos + 100,self.y_pos + 120))
+        RenderText(str(mx),white,(self.x_pos + 100,self.y_pos + 140))
+        RenderText(str(my),white,(self.x_pos + 100,self.y_pos + 160))
+        screen.blit(self.txt_surface, (self.InputRect.x+5, self.InputRect.y+5))
+        pygame.draw.rect(screen, self.color, self.InputRect, 2)
+
+class FundsInputBox(NewInputBox):
+    def __init__(self, x_pos, y_pos, w, h, title, text='', WindowActive = False):
+        super().__init__(x_pos, y_pos, w, h, title, text='', WindowActive = False)
+        
+    def Handle_FundEvent(self, event):
+      if event.type == pygame.MOUSEBUTTONDOWN:
+          if self.CloseRect.collidepoint(event.pos):
+            self.WindowActive = False
+          if self.InputRect.collidepoint(event.pos):
+              self.InputActive = not self.InputActive
+          else:
+              self.InputActive = False
+          self.color = dark_gray if self.InputActive else gray
+      if event.type == pygame.KEYDOWN:
+          if self.InputActive:
+              if event.key == pygame.K_RETURN:
+                  AddFunds(int(self.text))
+                  self.text = ''
+                  self.InputActive = not self.InputActive
+                  self.WindowActive = False
+              elif event.key == pygame.K_BACKSPACE:
+                  self.text = self.text[:-1]
+              elif len(self.text) > 24:
+                self.text = self.text[:-1]
+              else:
+                  self.text += event.unicode
+              # Re-render the text.
+              self.txt_surface = myfont.render(self.text, True, self.color)
+              
+    
+      
+        
+
+      
+      
+
+class InfoBox:
+
+    def __init__(self, x_pos, y_pos,title,dict, text='', WindowActive = False):
+      self.x_pos = x_pos
+      self.y_pos = y_pos
+      self.title = title
+      self.dict = dict
+      self.WindowActive = WindowActive
+      self.color = gray
+      self.text = text
+      self.txt_surface = FONT.render(text, True, self.color)
+      self.InputActive = False
+      self.WindowOrigin = (self.x_pos,self.x_pos)
+      self.WindowSize = (300,300)
+      self.TaskBarHeight = 30
+      self.WindowRect = pygame.Rect(self.x_pos,self.y_pos,self.WindowSize[0],self.WindowSize[1])
+      self.BarRect = pygame.Rect(self.x_pos,self.y_pos,self.WindowSize[0],self.TaskBarHeight)
+      self.CloseRect = pygame.Rect(self.x_pos + self.WindowSize[0] - self.TaskBarHeight, self.y_pos,self.TaskBarHeight,self.TaskBarHeight)
+
+
+    def handle_event(self, event):
+      if event.type == pygame.MOUSEBUTTONDOWN:
+        if self.CloseRect.collidepoint(event.pos):
+          self.WindowActive = False
+        self.color = dark_gray if self.InputActive else gray
+      if event.type == pygame.KEYDOWN:
+        pass
+
+    def draw(self, screen):
+      if self.WindowActive:
+        pygame.draw.rect(screen,light_gray,self.WindowRect)
+        pygame.draw.rect(screen,black,self.BarRect)
+        pygame.draw.rect(screen,red,self.CloseRect)
+        RenderText(self.title,white,(self.x_pos+28/4,self.y_pos + 28/4))
+        RenderText('X',white,(self.x_pos + self.WindowSize[0] - self.TaskBarHeight+28/4, self.y_pos+28/4))
+        text = str(self.dict['funds'])
+        RenderText('Funds: ' + text,white,(self.x_pos+100,self.y_pos+100))
+
+
+click = False
+
+dict_game = {'funds':0,
+        'time':15,
+        'people':20,
+        'dogs':16}
+
+
+Button1 = pygame.Rect(20,20,15,15)
+Button2 = pygame.Rect(20,40,15,15)
+Button3 = pygame.Rect(20,60,15,15)
+Button4 = pygame.Rect(20,80,15,15)
+Button5 = pygame.Rect(20,100,15,15)
+button_list = [Button1,Button2,Button3,Button4,Button5]
+
+Input1 = NewInputBox(100,100,140,32,'You Suck')
+
+
+Window2 = InfoBox(100,100,'This is a title, Window2',dict_game)
+info_windows = [Window2]
+
+FundsInput = FundsInputBox(100,100,250,32,'How much money?')
+input_boxes = [Input1,FundsInput]
+
+run = True
+while run:
+
+  mx,my = pygame.mouse.get_pos()
+  
+  screen.fill(sky_blue)
+
+  
+
+  for button in button_list:
+    pygame.draw.rect(screen,white,button)
+    
+  if FundsInput.WindowActive:
+    FundsInput.draw(screen)
+    
+    
+  if Input1.WindowActive:
+    Input1.draw(screen)
+  
+  if Window2.WindowActive:
+    Window2.draw(screen)
+
+  for event in pygame.event.get():
+
+    if button_list[0].collidepoint(mx,my) and click:
+      Input1.WindowActive = True
+      
+    if button_list[1].collidepoint(mx,my) and click:
+      Window2.WindowActive = True
+      
+    if button_list[2].collidepoint(mx,my) and click:
+      FundsInput.WindowActive = True
+
+    if Input1.WindowActive:
+      Input1.handle_event(event)
+      
+    if FundsInput.WindowActive:
+      FundsInput.Handle_FundEvent(event)
+      
+    for window in info_windows:
+      window.handle_event(event)
+
+    if event.type == pygame.MOUSEBUTTONDOWN:
+      click = True
+
+    if event.type == pygame.MOUSEBUTTONUP:
+      click = False
+
+    if event.type == pygame.QUIT:
+      run = False
+      pygame.quit()
+      sys.exit()
+
+  pygame.display.update()
+  mainClock.tick(60)
